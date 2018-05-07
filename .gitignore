@@ -3,3 +3,14 @@
 
 # Ada Library Information
 *.ali
+b__*
+*-loc.xml
+gnatinspect.*
+gpsauto.*
+*.stdout
+*.stderr
+*.bexch
+Makefile.conf
+messages.txt
+/bin/*
+
