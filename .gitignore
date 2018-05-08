@@ -13,5 +13,5 @@ gpsauto.*
 Makefile.conf
 messages.txt
 /bin/*
-
 e.bmp
+*.orig
