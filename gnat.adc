@@ -1,0 +1,19 @@
+pragma Discard_Names;
+
+pragma Eliminate (Posix, Write, Source_Location => "posix.ads:278");
+pragma Eliminate (Posix, Read, Source_Location => "posix.ads:282");
+pragma Eliminate (Posix, Memory_Unmap, Source_Location => "posix.ads:389");
+pragma Eliminate (Posix, Put, Source_Location => "posix.ads:67");
+pragma Eliminate (Posix, File_Descriptor, Source_Location => "posix.ads:286");
+pragma Eliminate (Posix, Device_Id, Source_Location => "posix.ads:318");
+pragma Eliminate (Posix, Inode_Number, Source_Location => "posix.ads:322");
+pragma Eliminate (Posix, Hard_Link_Count, Source_Location => "posix.ads:326");
+pragma Eliminate (Posix, Mode, Source_Location => "posix.ads:331");
+pragma Eliminate (Posix, User_Id, Source_Location => "posix.ads:335");
+pragma Eliminate (Posix, Group_Id, Source_Location => "posix.ads:339");
+pragma Eliminate (Posix, Special_Device_Id, Source_Location => "posix.ads:343");
+pragma Eliminate (Posix, Block_Size, Source_Location => "posix.ads:352");
+pragma Eliminate (Posix, Block_Count, Source_Location => "posix.ads:357");
+pragma Eliminate (Posix, Last_Access_Time, Source_Location => "posix.ads:361");
+pragma Eliminate (Posix, Modification_Time, Source_Location => "posix.ads:365");
+pragma Eliminate (Posix, Change_Time, Source_Location => "posix.ads:370");
