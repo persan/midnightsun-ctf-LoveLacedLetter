@@ -4,7 +4,6 @@ private with Ada.Unchecked_Conversion;
 
 package Posix is
 
-   package Px renames Posix;
 
    type File;
    type File_Status;
@@ -261,7 +260,7 @@ package Posix is
      Default_Initial_Condition => Is_Closed (File);
 
    procedure Open
-     (File      : in out Px.File;
+     (File      : in out Posix.File;
       File_Name : in     C_String;
       Flags     : in     O_FLag;
       S_Flags   : in     S_FLag) with
@@ -269,47 +268,47 @@ package Posix is
      Pre    => File.Is_Closed;
    -- To open a file for reading example:
    --
-   -- File : Px.File;
+   -- File : Posix.File;
    --
 
-   procedure Close (File : in out Px.File) with
+   procedure Close (File : in out Posix.File) with
      Global => null,
      Pre    => File.Is_Open,
      Post   => File.Is_Closed;
 
-   procedure Write (File : Px.File; Bytes : Byte_Array) with
+   procedure Write (File : Posix.File; Bytes : Byte_Array) with
      Global => null,
      Pre    => File.Is_Open;
 
-   function Read (File : Px.File; Bytes : in out Byte_Array) return SSize_Type with
+   function Read (File : Posix.File; Bytes : in out Byte_Array) return SSize_Type with
      Global => null,
      Pre    => File.Is_Open;
 
-   function File_Descriptor (File : Px.File) return Integer with
+   function File_Descriptor (File : Posix.File) return Integer with
      Global => null,
      Pre    => File.Is_Open;
 
    procedure Get_File_Status
-     (File   : in     Px.File;
+     (File   : in     Posix.File;
       Status : in out File_Status) with
      Global => null,
      Pre    => File.Is_Open;
 
    procedure Map_Memory
-     (File    : in Px.File;
+     (File    : in Posix.File;
       Address : Void_Ptr;
       Len     : Size_Type;
       Prot    : Prot_FLag;
       Flags   : int;
-      Offset  : Px.Offset;
-      Memory_Map : in out Px.Memory_Map) with
+      Offset  : Posix.Offset;
+      Memory_Map : in out Posix.Memory_Map) with
      Global => null,
      Pre    => not Has_Mapping (Memory_Map);
 
-   function Is_Open (File : Px.File) return Boolean with
+   function Is_Open (File : Posix.File) return Boolean with
      Global => null;
 
-   function Is_Closed (File : Px.File) return Boolean with
+   function Is_Closed (File : Posix.File) return Boolean with
      Global => null;
 
    type File_Status is tagged limited private;
@@ -375,15 +374,15 @@ package Posix is
 
    type Memory_Map is tagged limited private;
 
-   function Has_Mapping (Map : Px.Memory_Map) return Boolean with
+   function Has_Mapping (Map : Posix.Memory_Map) return Boolean with
      Global => null;
 
-   function Mapping (Map : Px.Memory_Map) return Void_Ptr with
+   function Mapping (Map : Posix.Memory_Map) return Void_Ptr with
      Global => null,
      Pre    => Map.Has_Mapping;
 
    -- Returns 0 on success, otherwise -1.
-   function Unmap_Memory (Map : in out Px.Memory_Map) return Integer with
+   function Unmap_Memory (Map : in out Posix.Memory_Map) return Integer with
      Global => null,
      Post   => (if Unmap_Memory'Result = 0 then not Map.Has_Mapping);
 
@@ -506,7 +505,7 @@ private
          Prot   : Prot_FLag;
          Flags  : int;
          Fd     : Integer;
-         Offset : Px.Offset) return Void_Ptr with
+         Offset : Posix.Offset) return Void_Ptr with
         Import        => True,
         Convention    => C,
         External_Name => "mmap";
@@ -523,16 +522,16 @@ private
       My_Is_Open         : Boolean := False;
    end record;
 
-   function Is_Open (File : Px.File) return Boolean is (File.My_Is_Open);
+   function Is_Open (File : Posix.File) return Boolean is (File.My_Is_Open);
 
-   function Is_Closed (File : Px.File) return Boolean is (not File.My_Is_Open);
+   function Is_Closed (File : Posix.File) return Boolean is (not File.My_Is_Open);
 
    type File_Status is tagged limited record
       My_Status   : aliased Px_Thin.File_Status_T;
       My_Is_Valid : Boolean := False;
    end record;
 
-   function File_Descriptor (File : Px.File) return Integer is
+   function File_Descriptor (File : Posix.File) return Integer is
      (File.My_File_Descriptor);
 
    function Is_Valid
@@ -602,9 +601,9 @@ private
    end record;
 
    function Has_Mapping
-     (Map : Px.Memory_Map) return Boolean is (Map.My_Mapping /= MAP_FAILED);
+     (Map : Posix.Memory_Map) return Boolean is (Map.My_Mapping /= MAP_FAILED);
 
-   function Mapping (Map : Px.Memory_Map) return Void_Ptr is (Map.My_Mapping);
+   function Mapping (Map : Posix.Memory_Map) return Void_Ptr is (Map.My_Mapping);
 
    STDIN  : constant File :=
      (

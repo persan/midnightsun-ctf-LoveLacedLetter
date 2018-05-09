@@ -1,65 +1,21 @@
 with System.Storage_Elements;
+with Hide.BMP;
 procedure Hide.Main is
 
-   use type Px.C_String;
+   use type Posix.C_String;
 
    subtype Storage_Offset is System.Storage_Elements.Storage_Offset;
 
-   package BMP is
 
-      type Header is record
-         Signature_1 : Integer_8;
-         Signature_2 : Integer_8;
+   File_Name : Posix.C_String := +"data/d.bmp";
+   File : Posix.File;
+   File_Status : Posix.File_Status;
 
-         Size      : Integer_32;
-         -- File size in bytes
-
-         Reserved1 : Integer_16;
-         Reserved2 : Integer_16;
-
-         Offset    : Integer_32;
-         -- Start address in bytes where the image data can be found.
-      end record with
-        Pack => True;
-
-      type Info is record
-         Header        : BMP.Header;
-         Struct_Size   : Integer_32;
-         Width         : Integer_32; -- Image width in pixels
-         Height        : Integer_32; -- Image hieght in pixels
-         Planes        : Integer_16;
-         Pixel_Size    : Integer_16; -- Bits per pixel
-         Compression   : Integer_32; -- Zero means no compression
-         Image_Size    : Integer_32; -- Size of the image data in bytes
-         PPMX          : Integer_32; -- Pixels per meter in x led
-         PPMY          : Integer_32; -- Pixels per meter in y led
-         Palette_Size  : Integer_32; -- Number of colors
-         Important     : Integer_32;
-      end record with
-        Pack => True;
-
-      type Pixel_G8 is new Integer_8; -- 8 bit pixel grayscale
-      type Image_G8 is array (Integer range <>) of Pixel_G8;
-
-      type Byte_As_Bit_Array is array (1..8) of Boolean with
-        Pack => True;
-
-      type Pixel_ARGB32 is record -- 32 bit pixel (alpha, red, green, blue)
-         A, R, G, B : Byte_As_Bit_Array; -- 8 bit * 4 = 32 bit
-      end record;
-      type Image_ARGB32 is array (Integer range <>) of Pixel_ARGB32;
-
-   end BMP;
-
-   File_Name : Px.C_String := +"data/d.bmp";
-   File : Px.File;
-   File_Status : Px.File_Status;
-
-   Mmap : Px.Memory_Map;
+   Mmap : Posix.Memory_Map;
 
 begin
 
-   File.Open (File_Name, Px.O_RDONLY, Px.S_IRUSR);
+   File.Open (File_Name, Posix.O_RDONLY, Posix.S_IRUSR);
    if File.Is_Closed then
       Put_Line ("Failed to open file: " & (-File_Name));
       return;
@@ -73,10 +29,10 @@ begin
 
    Put_Line (File_Status.Size'Image);
 
-   File.Map_Memory (Address    => Px.Nil,
-                    Len        => Px.unsigned_long (File_Status.Size),
-                    Prot       => Px.PROT_READ,
-                    Flags      => Px.MAP_SHARED,
+   File.Map_Memory (Address    => Posix.Nil,
+                    Len        => Posix.unsigned_long (File_Status.Size),
+                    Prot       => Posix.PROT_READ,
+                    Flags      => Posix.MAP_SHARED,
                     Offset     => 0,
                     Memory_Map => MMap);
 
@@ -113,11 +69,11 @@ begin
          return;
       end if;
 
-      declare
-         S : constant String := Px.Get_Line;
-      begin
-         Put_Line (S'Length'Image);
-      end;
+--        declare
+--           S : constant String := Posix.Get_Line;
+--        begin
+--           Put_Line (S'Length'Image);
+--        end;
    end;
 
    declare
@@ -145,7 +101,7 @@ begin
       end if;
 
       declare
-         Bytes : Px.Byte_Array (1..Storage_Offset (File_Status.Size)) with
+         Bytes : Posix.Byte_Array (1..Storage_Offset (File_Status.Size)) with
            Import  => True,
            Address => MMap.Mapping;
 
@@ -153,15 +109,17 @@ begin
            Import  => True,
            Address => Bytes (138)'Address;
 
-         Output_File : Px.File;
-         Output_File_Name : constant Px.C_String := +"e.bmp";
-         use type Px.O_FLag;
+         Output_File : Posix.File;
+         Output_File_Name : constant Posix.C_String := +"e.bmp";
+         use type Posix.O_FLag;
       begin
-         Output_File.Open (Output_File_Name, Px.O_CREAT or Px.O_WRONLY, Px.S_IRUSR);
+         Output_File.Open (Output_File_Name, Posix.O_CREAT or Posix.O_WRONLY, Posix.S_IRUSR);
          if not Output_File.Is_Open then
             Put_Line ("Failed to open e.bmp for writing");
             return;
          end if;
+
+         BMP.Encode (Info,Pixels, 10, "test");
 
          Output_File.Write (Bytes);
 

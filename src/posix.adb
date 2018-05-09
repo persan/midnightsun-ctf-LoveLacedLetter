@@ -3,7 +3,7 @@ package body Posix is
    use type int;
 
    procedure Open
-     (File      : in out Px.File;
+     (File      : in out Posix.File;
       File_Name : in     C_String;
       Flags     : in     O_FLag;
       S_Flags   : in     S_FLag)
@@ -13,14 +13,14 @@ package body Posix is
       File.My_Is_Open         := File.My_File_Descriptor /= 0;
    end Open;
 
-   procedure Close (File : in out Px.File) is
+   procedure Close (File : in out Posix.File) is
    begin
       Px_Thin.Close (File.My_File_Descriptor);
       File.My_Is_Open := False;
    end Close;
 
    procedure Get_File_Status
-     (File   : in     Px.File;
+     (File   : in     Posix.File;
       Status : in out File_Status)
    is
       Result : constant Integer :=
@@ -31,7 +31,7 @@ package body Posix is
       Status.My_Is_Valid := Result = 0;
    end Get_File_Status;
 
-   procedure Write (File : Px.File; Bytes : Byte_Array) is
+   procedure Write (File : Posix.File; Bytes : Byte_Array) is
       SSize : SSize_Type;
    begin
       SSize :=
@@ -41,19 +41,19 @@ package body Posix is
            Count           => Bytes'Length);
    end Write;
 
-   function Read (File : Px.File; Bytes : in out Byte_Array) return SSize_Type is
+   function Read (File : Posix.File; Bytes : in out Byte_Array) return SSize_Type is
    begin
       return Px_Thin.Read (File.My_File_Descriptor, Bytes, Bytes'Length);
    end Read;
 
    procedure Map_Memory
-     (File    : in Px.File;
+     (File    : in Posix.File;
       Address : Void_Ptr;
       Len     : Size_Type;
       Prot    : Prot_FLag;
       Flags   : int;
-      Offset  : Px.Offset;
-      Memory_Map : in out Px.Memory_Map) is
+      Offset  : Posix.Offset;
+      Memory_Map : in out Posix.Memory_Map) is
    begin
       Memory_Map.My_Mapping := Px_Thin.Mmap (Address,
                                              Len,
@@ -64,7 +64,7 @@ package body Posix is
       Memory_Map.My_Length := Len;
    end Map_Memory;
 
-   function Unmap_Memory (Map : in out Px.Memory_Map) return Integer is
+   function Unmap_Memory (Map : in out Posix.Memory_Map) return Integer is
       R : Integer;
    begin
       R := Px_Thin.Munmap (Map.My_Mapping, Map.My_Length);

@@ -2,9 +2,8 @@ with Posix;
 
 package Hide is
 
-   package Px renames Posix;
 
-   procedure Put_Line (Text : String) renames Px.Put_Line;
+   procedure Put_Line (Text : String) renames Posix.Put_Line;
 
    type Integer_8  is range -2 **  7 .. 2 **  7 - 1;
    for Integer_8'Size use  8;
@@ -15,7 +14,5 @@ package Hide is
    type Integer_32 is range -2 ** 31 .. 2 ** 31 - 1;
    for Integer_32'Size use 32;
 
---     subtype Integer_16 is Interfaces.Integer_16;
---     subtype Integer_32 is Interfaces.Integer_32;
 
 end Hide;

@@ -7,12 +7,13 @@ project Coder is
 
    package Builder is
       for Executable ("hide-main.adb") use "hide";
-      for Switches ("ada") use ("--RTS=zfp");
+      for Switches ("ada") use ("-s", "-j0");
+--        for Switches ("ada") use Project.Builder'Switches ("ada") & ("--RTS=zfp");
    end Builder;
 
    package Compiler is
-      for Local_Configuration_Pragmas use "gnat.adc";
-      for Switches ("ada") use ("-O3", "-ffunction-sections", "-fdata-sections", "-flto", "-gnatn", "-funroll-loops", "-gnatQ", "-gnatp");
+--        for Local_Configuration_Pragmas use "gnat.adc";
+--        for Switches ("ada") use ("-O3", "-ffunction-sections", "-fdata-sections", "-flto", "-gnatn", "-funroll-loops", "-gnatQ", "-gnatp");
    end Compiler;
 
    package Linker is
@@ -20,4 +21,3 @@ project Coder is
    end Linker;
 
 end Coder;
-
