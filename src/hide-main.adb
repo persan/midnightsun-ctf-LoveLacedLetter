@@ -7,7 +7,7 @@ procedure Hide.Main is
    subtype Storage_Offset is System.Storage_Elements.Storage_Offset;
 
 
-   File_Name : Posix.C_String := +"data/d.bmp";
+   File_Name : Posix.C_String := +"data/C0000775.bmp";
    File : Posix.File;
    File_Status : Posix.File_Status;
 
@@ -96,15 +96,15 @@ begin
 
       if Info.Compression /= 3 then
          Put_Line ("Expected compression 3 was" & Info.Compression'Image);
-         File.Close;
-         return;
+--           File.Close;
+--           return;
       end if;
 
       declare
-         Bytes : Posix.Byte_Array (1..Storage_Offset (File_Status.Size)) with
+         Src_Bytes : Posix.Byte_Array (1..Storage_Offset (File_Status.Size)) with
            Import  => True,
            Address => MMap.Mapping;
-
+         Bytes     : Posix.Byte_Array := Src_Bytes; -- To get a read/write copy.
          Pixels : BMP.Image_ARGB32 (1..Integer (Info.Width*Info.Height)) with
            Import  => True,
            Address => Bytes (138)'Address;
