@@ -32,6 +32,8 @@ package Hide.BMP is
    end record with
      Pack => True;
 
+   function Image ( Item : Info ) return String ;
+
    type Pixel_G8 is new Integer_8; -- 8 bit pixel grayscale
    type Image_G8 is array (Integer range <>) of Pixel_G8;
 

@@ -13,7 +13,8 @@ project Coder is
 
    package Compiler is
 --        for Local_Configuration_Pragmas use "gnat.adc";
---        for Switches ("ada") use ("-O3", "-ffunction-sections", "-fdata-sections", "-flto", "-gnatn", "-funroll-loops", "-gnatQ", "-gnatp");
+   --        for Switches ("ada") use ("-O3", "-ffunction-sections", "-fdata-sections", "-flto", "-gnatn", "-funroll-loops", "-gnatQ", "-gnatp");
+      for Switches ("ada") use ("-gnateE", "-g", "-gnata");
    end Compiler;
 
    package Linker is
