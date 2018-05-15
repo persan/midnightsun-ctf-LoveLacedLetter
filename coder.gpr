@@ -4,13 +4,13 @@ project Coder is
    for Object_Dir use ".obj";
    for Exec_Dir use "bin";
    for Main use ("hide-main.adb",
-                 "hide-file_coder-decode_main.adb",
-                 "hide-file_coder-encode_main.adb");
+                 "hide-file_coder-decode_main.ads",
+                 "hide-file_coder-encode_main.ads");
 
    package Builder is
       for Executable ("hide-main.adb") use "hide";
-      for Executable ("hide-file_coder-decode_main.adb") use "decode";
-      for Executable ("hide-file_coder-encode_main.adb") use "encode";
+      for Executable ("hide-file_coder-decode_main.ads") use "decode";
+      for Executable ("hide-file_coder-encode_main.ads") use "encode";
 
       for Switches ("ada") use Builder'Switches ("ada") & ("-s", "-j0", "-g");
       for Switches ("ada") use Builder'Switches ("ada") & ("--RTS=zfp");

@@ -1,4 +1,4 @@
-procedure Hide.File_Coder.Decode_Main is
+procedure Hide.Decode_generic is
    use all type Posix.C_String;
    Source_File :constant String:= Posix.Get_Line;
 begin

@@ -1,5 +1,5 @@
 with Hide.Value;
-procedure Hide.File_Coder.Encode_Main is
+procedure Hide.Encode_Generic is
    use all type Posix.C_String;
    Source_File : constant String := Posix.Get_Line;
    Offset      : constant Natural := Value (Posix.Get_Line);
@@ -8,6 +8,5 @@ procedure Hide.File_Coder.Encode_Main is
 
 begin
 
-
    Encode ((+Source_File), (+Output_File), Offset , Text);
-end Hide.File_Coder.Encode_Main;
+end Hide.Encode_Generic;
