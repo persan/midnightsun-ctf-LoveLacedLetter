@@ -1,4 +1,5 @@
 pragma Ada_2012;
+with Hide.Value;
 package body Hide.BMP is
    MAX_TEXT_LENGTH : constant := 1024;
    ------------
@@ -72,6 +73,7 @@ package body Hide.BMP is
       Offset     : Natural;
       Text       : in String)
    is
+      pragma Unreferenced (Image_Info);
    begin
       pragma Debug (Posix.Put_Line ("Encode"));
       Chanel := Chanels'First;
@@ -129,20 +131,12 @@ package body Hide.BMP is
       return Output_Buffer (Output_Buffer'First .. Output_Cursor);
    end;
 
+
    function Decode
      (Image      : in Image_ARGB32)
       return Natural is
-      Data : constant String := Decode (Image);
-      Map  : array (Character'('0') .. Character'('9')) of Integer := (0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
    begin
-      return Ret : Natural := 0 do
-         for Cursor in Data'Range loop
-            Ret := ret + Map (Data (Cursor));
-            if Cursor /=  Data'Last then
-               Ret := Ret * 10;
-            end if;
-         end loop;
-      end return;
+      return value(Decode (Image));
    end;
 
 
@@ -151,6 +145,7 @@ package body Hide.BMP is
       Image      : in Image_ARGB32)
       return String
    is
+      pragma Unreferenced (Image_Info);
    begin
       Chanel := Chanels'First;
       return Decode (Image (Decode (Image) .. Image'Last));

@@ -1,6 +1,5 @@
 package body Posix is
 
-   use type int;
 
    procedure Open
      (File      : in out Posix.File;
@@ -32,7 +31,7 @@ package body Posix is
    end Get_File_Status;
 
    procedure Write (File : Posix.File; Bytes : Byte_Array) is
-      SSize : SSize_Type;
+      SSize : SSize_Type with Unreferenced;
    begin
       SSize :=
         Px_Thin.Write

@@ -17,3 +17,5 @@ e.bmp
 *.orig
 *.cswi
 
+/*.bmp
+/input

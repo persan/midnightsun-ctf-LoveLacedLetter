@@ -3,22 +3,30 @@ project Coder is
    for Source_Dirs use ("src");
    for Object_Dir use ".obj";
    for Exec_Dir use "bin";
-   for Main use ("hide-main.adb");
+   for Main use ("hide-main.adb",
+                 "hide-file_coder-decode_main.adb",
+                 "hide-file_coder-encode_main.adb");
 
    package Builder is
       for Executable ("hide-main.adb") use "hide";
---        for Switches ("ada") use ("-s", "-j0");
-      for Switches ("ada") use Builder'Switches ("ada") & ("--RTS=zfp", "-s", "-j0");
+      for Executable ("hide-file_coder-decode_main.adb") use "decode";
+      for Executable ("hide-file_coder-encode_main.adb") use "encode";
+      for Switches ("ada") use Builder'Switches ("ada") & ("-s", "-j0", "-g");
+      --  for Switches ("ada") use Builder'Switches ("ada") & ("--RTS=zfp");
    end Builder;
 
    package Compiler is
       for Local_Configuration_Pragmas use "gnat.adc";
-         for Switches ("ada") use ("-O3", "-ffunction-sections", "-fdata-sections", "-flto", "-gnatn", "-funroll-loops", "-gnatQ", "-gnatp");
---        for Switches ("ada") use ("-gnateE", "-g", "-gnata");
+      for Switches ("ada") use ("-O3", "-ffunction-sections", "-fdata-sections", "-flto", "-gnatn", "-funroll-loops", "-gnatQ", "-gnatp");
+
+--        for Switches ("ada") use ("-O0", "-gnatwa","-gnateE");
    end Compiler;
+   package Binder is
+        for Switches ("ada") use ("-E");
+   end Binder;
 
    package Linker is
---        for Switches ("ada") use ("-Wl,--gc-sections", "-flto");
+      for Switches ("ada") use ("-Wl,--gc-sections", "-flto");
    end Linker;
 
 end Coder;

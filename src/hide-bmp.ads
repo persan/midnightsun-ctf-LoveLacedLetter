@@ -50,5 +50,4 @@ package Hide.BMP is
                      Text       : in String);
    function Decode (Image_Info : Info;
                     Image      : in Image_ARGB32) return String;
-
 end Hide.BMP;
