@@ -1,8 +1,5 @@
---  with Ada; use Ada;
---  with Ada.Text_IO;
---  with Ada.Streams.Stream_IO;
---  use Ada.Streams;
 with System.Storage_Elements;
+
 procedure Hide.Main is
 
    subtype Storage_Offset is System.Storage_Elements.Storage_Offset;
@@ -45,17 +42,6 @@ procedure Hide.Main is
          Important     : Integer_32;
       end record with
         Pack => True;
-
---      type Pixel_G8 is new Integer_8; -- 8 bit pixel grayscale
---      type Image_G8 is array (Integer range <>) of Pixel_G8;
-
---        type Byte_As_Bit_Array is array (1..8) of Boolean with
---          Pack => True;
-
---        type Pixel_ARGB32 is record -- 32 bit pixel (alpha, red, green, blue)
---           A, R, G, B : Byte_As_Bit_Array; -- 8 bit * 4 = 32 bit
---        end record;
---      type Image_ARGB32 is array (Integer range <>) of Pixel_ARGB32;
 
    end BMP;
 
@@ -221,10 +207,6 @@ procedure Hide.Main is
       Bytes : Px.Byte_Array (1..Storage_Offset (File_Status.Size)) with
         Import  => True,
         Address => MMap.Mapping;
-
-      --           Pixels : BMP.Image_ARGB32 (1..Integer (Info.Width*Info.Height)) with
-      --             Import  => True,
-      --             Address => Bytes (138)'Address;
    begin
       Count_Max_Message_Size (Bytes);
    end View_BMP_File_Contents_As_Byte_Array;
@@ -437,8 +419,8 @@ procedure Hide.Main is
       Output_File_Name : constant Px.C_String := +Ada_Output_File_Name;
    begin
       Output_File.Open (Output_File_Name,
-                        Px.O_RDWR or Px.O_CREAT,
-                        Px.S_IRUSR or Px.S_IWUSR);
+                        Px.O_WRONLY or Px.O_TRUNC or Px.O_CREAT,
+                        Px.S_IRUSR or Px.S_IWUSR or Px.S_IROTH);
       if not Output_File.Is_Open then
          Put_Line ("Failed to open e.bmp for writing");
          return;
@@ -447,30 +429,6 @@ procedure Hide.Main is
       Output_File.Write (Bytes (1..138));
 
       Write_Length;
-
---        for I in Storage_Offset range 139..Bytes'Last - 1 loop
---           declare
---              Left_Byte  : Px.Byte := Bytes (I - 1);
---              Right_Byte : Px.Byte := Bytes (I + 1);
---
---              Left_Bits : Bit_Array with
---                Import  => True,
---                Address => Left_Byte'Address;
---
---              Right_Bits : Bit_Array with
---                Import  => True,
---                Address => Right_Byte'Address;
---           begin
---              Left_Bits (8)  := False;
---              Right_Bits (8) := False;
---
---              if Left_Byte /= Right_Byte then
---                 Put_Line ("Index" & I'Image);
---              end if;
---
---              Output_File.Write (Bytes (I..I));
---           end;
---        end loop;
    end Save_New_BMP_File;
 
 begin

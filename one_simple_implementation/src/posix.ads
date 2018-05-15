@@ -99,40 +99,40 @@ package Posix is
    --  #define  __S_IEXEC   0100   /* Execute by owner.  */
 
    -- Read by owner.
-   S_IRUSR : constant S_FLag := 0400;
+   S_IRUSR : constant S_FLag := 8#400#; -- 256 in decimal
 
    -- Write by owner.
-   S_IWUSR : constant S_FLag := 0200;
+   S_IWUSR : constant S_FLag := 8#200#; -- 128 in decimal
 
    -- Execute by owner.
-   S_IXUSR : constant S_FLag := 0100;
+   S_IXUSR : constant S_FLag := 8#100#; -- 64 in decimal
 
    -- Read, write, and execute by owner.
    S_IRWXU : constant S_FLag := S_IRUSR or S_IWUSR or S_IXUSR;
 
    -- Read by group.
-   S_IRGRP : constant S_FLag := 3_200;
+   S_IRGRP : constant S_FLag := S_IRUSR / 8;
 
    -- Write by group.
-   S_IWGRP : constant S_FLag := 1_600;
+   S_IWGRP : constant S_FLag := S_IWUSR / 8;
 
    -- Execute by group.
-   S_IXGRP : constant S_FLag := 800;
+   S_IXGRP : constant S_FLag := S_IXUSR / 8;
 
    -- Read, write, and execute by group.
-   S_IRWXG : constant S_FLag := 5_600;
+   S_IRWXG : constant S_FLag := S_IRWXU / 8;
 
    -- Read by others.
-   S_IROTH : constant S_FLag := 25_600;
+   S_IROTH : constant S_FLag := S_IRGRP / 8;
 
    -- Write by others.
-   S_IWOTH : constant S_FLag := 12_800;
+   S_IWOTH : constant S_FLag := S_IWGRP / 8;
 
    -- Execute by others.
-   S_IXOTH : constant S_FLag := 6_400;
+   S_IXOTH : constant S_FLag := S_IXGRP / 8;
 
    -- Read, write, and execute by others.
-   S_IRWXO : constant S_FLag := 44_800;
+   S_IRWXO : constant S_FLag := S_IRWXG / 8;
 
    -- Open for reading only
    O_RDONLY : constant O_FLag := 16#00#;
@@ -145,21 +145,21 @@ package Posix is
 
    O_ACCMODE : constant O_FLag := 16#03#;
 
-   O_CREAT : constant O_FLag := 0100;
+   O_CREAT : constant O_FLag := 8#100#;
 
-   O_EXCL : constant O_FLag := 0200;
+   O_EXCL : constant O_FLag := 8#200#;
 
-   O_NOCTTY : constant O_FLag := 0400;
+   O_NOCTTY : constant O_FLag := 8#400#;
 
-   O_TRUNC : constant O_FLag := 01000;
+   O_TRUNC : constant O_FLag := 8#1000#;
 
-   O_APPEND : constant O_FLag := 02000;
+   O_APPEND : constant O_FLag := 8#2000#;
 
-   O_NONBLOCK : constant O_FLag := 04000;
+   O_NONBLOCK : constant O_FLag := 8#4000#;
 
-   O_SYNC : constant O_FLag := 04010000;
+   O_SYNC : constant O_FLag := 8#4010000#;
 
-   O_ASYNC : constant O_FLag := 020000;
+   O_ASYNC : constant O_FLag := 8#20000#;
 
    -- Protections are chosen from these bits, OR'd together.  The
    -- implementation does not necessarily support PROT_EXEC or PROT_WRITE
@@ -519,13 +519,12 @@ private
    end Px_Thin;
 
    type File is tagged limited record
-      My_File_Descriptor : Integer;
-      My_Is_Open         : Boolean := False;
+      My_File_Descriptor : Integer := -1;
    end record;
 
-   function Is_Open (File : Px.File) return Boolean is (File.My_Is_Open);
+   function Is_Open (File : Px.File) return Boolean is (File.My_File_Descriptor /= -1);
 
-   function Is_Closed (File : Px.File) return Boolean is (not File.My_Is_Open);
+   function Is_Closed (File : Px.File) return Boolean is (File.My_File_Descriptor = -1);
 
    type File_Status is tagged limited record
       My_Status   : aliased Px_Thin.File_Status_T;
@@ -608,20 +607,17 @@ private
 
    STDIN  : constant File :=
      (
-      My_File_Descriptor => Px_Thin.STDIN_FILENO,
-      My_Is_Open         => True
+      My_File_Descriptor => Px_Thin.STDIN_FILENO
      );
 
    STDOUT : constant File :=
      (
-      My_File_Descriptor => Px_Thin.STDOUT_FILENO,
-      My_Is_Open         => True
+      My_File_Descriptor => Px_Thin.STDOUT_FILENO
      );
 
    STDERR : constant File :=
      (
-      My_File_Descriptor => Px_Thin.STDERR_FILENO,
-      My_Is_Open         => True
+      My_File_Descriptor => Px_Thin.STDERR_FILENO
      );
 
 end Posix;

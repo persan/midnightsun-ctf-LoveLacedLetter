@@ -10,13 +10,11 @@ package body Posix is
    is
    begin
       File.My_File_Descriptor := Px_Thin.Open (File_Name, Flags, S_Flags);
-      File.My_Is_Open         := File.My_File_Descriptor /= 0;
    end Open;
 
    procedure Close (File : in out Px.File) is
    begin
       Px_Thin.Close (File.My_File_Descriptor);
-      File.My_Is_Open := False;
    end Close;
 
    procedure Get_File_Status
