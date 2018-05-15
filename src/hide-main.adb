@@ -232,8 +232,7 @@ procedure Hide.Main is
       end;
    end;
 begin
-
-   Encode ((+"data/C0000775.bmp"), (+"e.bmp"),10,"test");
+   Encode ((+"data/C0000775.bmp"), (+"e.bmp"), 7125, "<SAAB IS HUNTING THE FLAG>");
    Put_Line (Decode ((+"e.bmp")));
 
 

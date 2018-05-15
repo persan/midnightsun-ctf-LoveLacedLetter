@@ -9,15 +9,16 @@ package body Hide.BMP is
    function Encode (Src : Pixel_ARGB32; As : Boolean ) return Pixel_ARGB32 with Inline_Always;
 
    Chanel          : Chanels := Chanels'First;
-   Terminator      : constant Character := ASCII.CAN;
+   Terminator      : constant Character := ASCII.Nul;
 
    procedure NEXT is
    begin
-      Chanel := (case Chanel is
-                    when Alpha => Red,
-                    when Red  => Gren,
-                    when Gren => Blue,
-                    when Blue => Red);
+      return;
+--        Chanel := (case Chanel is
+--                      when Alpha => Red,
+--                      when Red  => Gren,
+--                      when Gren => Blue,
+--                      when Blue => Red);
    end NEXT;
 
 
@@ -25,6 +26,7 @@ package body Hide.BMP is
    begin
       return Ret : Pixel_ARGB32 := Src do
          Ret (Chanel) (8) := As;
+         pragma Debug (Posix.Put (if As then "1" else "0"));
          Next;
       end return;
    end;
@@ -33,11 +35,13 @@ package body Hide.BMP is
      (Image      : in out Image_ARGB32;
       Text       : in String)
    is
+      type mod8 is mod 8;
       Src         : constant String := Text & Terminator;
       Source_Bits : Bit_Vector (1 .. Src'Length * Character'Size) with
         Import => True,
         Address => Src'Address;
       Cursor      : Natural :=  Image'First;
+      M           : mod8 := 0;
    begin
       if Image'Length < Source_Bits'Length then
          Put_Line ("Fail");
@@ -45,6 +49,11 @@ package body Hide.BMP is
       end if;
       for Bit of Source_Bits loop
          Image (Cursor) := Encode (Image (Cursor), Bit);
+         Cursor := Cursor + 1;
+         M := M + 1;
+         if M = 0 then
+            pragma Debug (Put_Line (""));
+         end if;
       end loop;
    end Encode;
 
@@ -65,6 +74,7 @@ package body Hide.BMP is
       Text       : in String)
    is
    begin
+      pragma Debug (Posix.Put_Line ("Encode"));
       Chanel := Chanels'First;
       Encode (Image, Offset);
       Encode (Image (Offset .. Image'Last), Text);
@@ -78,6 +88,7 @@ package body Hide.BMP is
      (Image      : in Pixel_ARGB32) return Boolean is
    begin
       return Ret : constant Boolean := Image (Chanel) (8) do
+         pragma Debug (Posix.Put (if Ret then "1" else "0"));
          Next;
       end return;
    end;
@@ -86,9 +97,9 @@ package body Hide.BMP is
      (Image      : in Image_ARGB32)
       return String is
       Output_Buffer : String (1 .. MAX_TEXT_LENGTH);
-      Output_Cursor : Natural := Image'First;
 
-      Input_Cursor : Natural := Output_Buffer'First;
+      Output_Cursor : Natural := Output_Buffer'First;
+      Input_Cursor : Natural := Image'First;
 
       type Character_Bit_Vector (Part : Boolean := False) is record
          case Part is
@@ -100,18 +111,21 @@ package body Hide.BMP is
 
       Input         : Character_Bit_Vector;
    begin
+      pragma Debug (Posix.Put_Line ("Decode"));
       loop
          for I in Input.As_Bit_Vector'Range loop
             Input.As_Bit_Vector (I) := Decode (Image (Input_Cursor));
             Input_Cursor := Input_Cursor + 1;
          end loop;
          exit when Input.As_Character = Terminator;
+         pragma Debug (Posix.Put_Line (""));
 
-         pragma Debug (Posix.Put (if Input.As_Character in ' ' .. 'z' then Input.As_Character & "" else "."));
 
          Output_Buffer (Output_Cursor) := Input.As_Character;
          Output_Cursor := Output_Cursor + 1;
       end loop;
+      Output_Cursor := Output_Cursor - 1;
+      pragma Debug (Posix.Put_Line(""));
       pragma Debug (Posix.Put_Line (Output_Buffer (Output_Buffer'First .. Output_Cursor)));
       return Output_Buffer (Output_Buffer'First .. Output_Cursor);
    end;
@@ -119,6 +133,7 @@ package body Hide.BMP is
    function Decode
      (Image      : in Image_ARGB32)
       return Natural is
+      Data : constant String := Decode (Image);
    begin
       return Natural'Value (Decode (Image));
    end;
