@@ -290,7 +290,30 @@ procedure Hide.Main is
 
       I : Storage_Offset := 139;
 
+      Buffer : Px.Byte_Array (1..10_000);
+
+      Current_Buffer_Index : Storage_Offset := 0;
+
       Output_File : Px.File;
+
+      procedure Flush_Buffer is
+      begin
+         if Current_Buffer_Index > 0 then
+            Output_File.Write (Buffer (1..Current_Buffer_Index));
+            Current_Buffer_Index := 0;
+         end if;
+      end Flush_Buffer;
+
+      procedure Write_Byte_To_Buffer (Byte : Px.Byte) is
+      begin
+         if Current_Buffer_Index >= Buffer'Length then
+            Output_File.Write (Buffer (1..Current_Buffer_Index));
+            Current_Buffer_Index := 0;
+         end if;
+
+         Current_Buffer_Index := Current_Buffer_Index + 1;
+         Buffer (Current_Buffer_Index) := Byte;
+      end Write_Byte_To_Buffer;
 
       procedure Write_Length;
       procedure Write_Message;
@@ -321,21 +344,21 @@ procedure Hide.Main is
 
                if Left_Byte /= Right_Byte then
                   declare
-                     Temp      : Px.Byte_Array (1..1) := Bytes (I..I);
+                     Temp      : Px.Byte := Bytes (I);
                      Temp_Bits : Bit_Array with
                        Import  => True,
-                       Address => Temp (1)'Address;
+                       Address => Temp'Address;
                   begin
                      Temp_Bits (8) := Length_Bits (Bit_Index);
 
 --                     Put_Line ("Index" & I'Image & ", bit" & Temp_Bits (8)'Image);
 
-                     Output_File.Write (Temp (1..1));
+                     Write_Byte_To_Buffer (Temp);
 
                      Bit_Index := Bit_Index + 1;
                   end;
                else
-                  Output_File.Write (Bytes (I..I));
+                  Write_Byte_To_Buffer (Bytes (I));
                end if;
 
                I := I + 1;
@@ -367,10 +390,10 @@ procedure Hide.Main is
 
                if Left_Byte /= Right_Byte then
                   declare
-                     Temp      : Px.Byte_Array (1..1) := Bytes (I..I);
+                     Temp      : Px.Byte := Bytes (I);
                      Temp_Bits : Bit_Array with
                        Import  => True,
-                       Address => Temp (1)'Address;
+                       Address => Temp'Address;
 
                      Current_Character_Bits : Bit_Array with
                        Import  => True,
@@ -378,7 +401,7 @@ procedure Hide.Main is
                   begin
                      Temp_Bits (8) := Current_Character_Bits (Bit_Index);
 
-                     Output_File.Write (Temp (1..1));
+                     Write_Byte_To_Buffer (Temp);
 
                      Bit_Index := Bit_Index + 1;
                      if Bit_Index > 8 then
@@ -387,7 +410,7 @@ procedure Hide.Main is
                      end if;
                   end;
                else
-                  Output_File.Write (Bytes (I..I));
+                  Write_Byte_To_Buffer (Bytes (I));
                end if;
 
                I := I + 1;
@@ -402,10 +425,11 @@ procedure Hide.Main is
       procedure Write_The_Rest_Of_The_Image is
       begin
          while I <= Bytes'Last - 1 loop
-            Output_File.Write (Bytes (I..I));
+            Write_Byte_To_Buffer (Bytes (I));
             I := I + 1;
          end loop;
-         Output_File.Write (Bytes (Bytes'Last..Bytes'Last));
+         Write_Byte_To_Buffer (Bytes (Bytes'Last));
+         Flush_Buffer;
          Output_File.Close;
          Put_Line ("Successfully created " & Ada_Output_File_Name);
       end Write_The_Rest_Of_The_Image;
