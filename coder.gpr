@@ -11,15 +11,16 @@ project Coder is
       for Executable ("hide-main.adb") use "hide";
       for Executable ("hide-file_coder-decode_main.adb") use "decode";
       for Executable ("hide-file_coder-encode_main.adb") use "encode";
+
       for Switches ("ada") use Builder'Switches ("ada") & ("-s", "-j0", "-g");
-      --  for Switches ("ada") use Builder'Switches ("ada") & ("--RTS=zfp");
+      for Switches ("ada") use Builder'Switches ("ada") & ("--RTS=zfp");
    end Builder;
 
    package Compiler is
       for Local_Configuration_Pragmas use "gnat.adc";
-      for Switches ("ada") use ("-O3", "-ffunction-sections", "-fdata-sections", "-flto", "-gnatn", "-funroll-loops", "-gnatQ", "-gnatp");
+      for Switches ("ada") use ("-O2", "-ffunction-sections", "-fdata-sections", "-flto", "-gnatn", "-funroll-loops", "-gnatQ", "-gnatp");
 
---        for Switches ("ada") use ("-O0", "-gnatwa","-gnateE");
+--        for Switches ("ada") use ("-O0", "-gnatwa", "-gnateE");
    end Compiler;
    package Binder is
         for Switches ("ada") use ("-E");

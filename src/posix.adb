@@ -102,23 +102,27 @@ package body Posix is
                               Count           => Text'Length);
    end Put;
 
-   function Get_Line return String is
-      SSize : SSize_Type;
-      B : Byte_Array (1..200);
-   begin
-      SSize := Px_Thin.Read (File_Descriptor => Px_Thin.STDIN_FILENO,
-                             Buffer          => B,
-                             Count           => Size_Type (200));
+   Max_Line_Length : constant := 1000;
 
-      declare
-         S : String (1..Integer (SSize));
-      begin
-         for I in Integer range 1..Integer (SSize) loop
+   function Get_Line return String is
+      SSize : SSize_Type with Unreferenced;
+      B     : Byte_Array (1 .. Max_Line_Length);
+      Cursor : System.Storage_Elements.Storage_Offset := B 'First;
+      use all type System.Storage_Elements.Storage_Offset;
+   begin
+      while True loop
+         SSize := Px_Thin.Read (File_Descriptor => Px_Thin.STDIN_FILENO,
+                                Buffer          => B (Cursor .. Cursor),
+                                Count           => 1);
+         exit when B (Cursor) in Character'Pos (ASCII.LF) | Character'Pos (ASCII.CR);
+         Cursor := Cursor + 1;
+      end loop;
+      Cursor := Cursor - 1;
+      return  S : String (1..Integer (Cursor)) do
+         for I in Integer range 1..Integer (Cursor) loop
             S (I) := Character'Val (B (System.Storage_Elements.Storage_Offset (I)));
          end loop;
-         return S (1..Integer (SSize - 1));
-      end;
-
+      end return;
    end Get_Line;
 
    function "-" (Text : C_String) return String is

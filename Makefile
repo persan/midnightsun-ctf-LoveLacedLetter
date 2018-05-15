@@ -8,13 +8,17 @@ compile:
 	gprbuild -p -j0 -P ${PROJECT}.gpr
 
 test:
+	@make encode
+	@make decode
+
 encode:
-	@echo data/Gripen_Agressor_21082017__ISV1318.bmp>input
-	@echo "56124">>input
-	@echo "<SAAB IS HUNTING THE FLAG>" >>input
+	@echo data/Gripen_Agressor_21082017__ISV1318.bmp >input
+	@echo "56124" >>input
+	@echo "<SAAB IS HU_NTING TH_E FLAG>" >>input
 	@echo Gripen_Agressor_21082017__ISV1318.bmp>>input
-	bin/encode <input
+	ulimit -s unlimited ; bin/encode <input
 decode:
-	echo Gripen_Agressor_21082017__ISV1318.bmp  |bin/decode
+	ulimit -s unlimited ; echo Gripen_Agressor_21082017__ISV1318.bmp  |bin/decode
+
 Makefile.conf:Makefile  # IGNORE
 	echo "export PATH=${PATH}" >$@

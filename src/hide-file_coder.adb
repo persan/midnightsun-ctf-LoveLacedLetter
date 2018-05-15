@@ -17,6 +17,10 @@ package body Hide.file_coder is
 
    begin
 
+      pragma Debug (Posix.Put ("Source_File_Name => ")); pragma Debug (Put_Line (-Source_File_Name));
+      pragma Debug (Posix.Put ("Text => ")); pragma Debug (Put_Line ( Text));
+      pragma Debug (Posix.Put ("Output_File_Name => ")); pragma Debug (Put_Line (-Output_File_Name));
+
       File.Open (Source_File_Name, Posix.O_RDONLY, Posix.S_IRUSR);
       if File.Is_Closed then
          Put_Line ("Failed to open file: " & (-Source_File_Name));
