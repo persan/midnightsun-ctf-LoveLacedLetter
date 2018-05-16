@@ -1,9 +1,8 @@
---  with Ada; use Ada;
---  with Ada.Text_IO;
---  with Ada.Streams.Stream_IO;
---  use Ada.Streams;
 with System.Storage_Elements;
+with Utilities;
 procedure Unhide.Main is
+
+   package U renames Utilities;
 
    subtype Storage_Offset is System.Storage_Elements.Storage_Offset;
 
@@ -58,9 +57,6 @@ procedure Unhide.Main is
 --      type Image_ARGB32 is array (Integer range <>) of Pixel_ARGB32;
 
    end BMP;
-
-   type Bit_Array is array (Integer range 1..8) of Boolean with
-     Pack => True;
 
    procedure Query_User_For_BMP_File_Name;
    procedure Open_File (File_Name : Px.C_String);
@@ -240,46 +236,28 @@ procedure Unhide.Main is
       procedure Read_Message;
 
       procedure Read_Length is
-         Length_Bits : Bit_Array with
+         Length_Bits : U.Bit_Array with
            Import  => True,
            Address => Length'Address;
 
          Bit_Index : Integer := 1;
       begin
          while I <= Bytes'Last - 1 loop
-            declare
-               Left_Byte  : Px.Byte := Bytes (I - 1);
-               Right_Byte : Px.Byte := Bytes (I + 1);
+            if U.Shall_Adjust_Byte (Bytes, I) then
+               declare
+                  Temp      : Px.Byte_Array (1..1) := Bytes (I..I);
+                  Temp_Bits : U.Bit_Array with
+                    Import  => True,
+                    Address => Temp (1)'Address;
+               begin
+                  Length_Bits (Bit_Index) := Temp_Bits (8);
 
-               Left_Bits : Bit_Array with
-                 Import  => True,
-                 Address => Left_Byte'Address;
+                  Bit_Index := Bit_Index + 1;
+               end;
+            end if;
 
-               Right_Bits : Bit_Array with
-                 Import  => True,
-                 Address => Right_Byte'Address;
-            begin
-               Left_Bits (8)  := False;
-               Right_Bits (8) := False;
-
-               if Left_Byte /= Right_Byte then
-                  declare
-                     Temp      : Px.Byte_Array (1..1) := Bytes (I..I);
-                     Temp_Bits : Bit_Array with
-                       Import  => True,
-                       Address => Temp (1)'Address;
-                  begin
-                     Length_Bits (Bit_Index) := Temp_Bits (8);
-
---                       Put_Line ("Index" & I'Image & ", bit" & Temp_Bits (8)'Image);
-
-                     Bit_Index := Bit_Index + 1;
-                  end;
-               end if;
-
-               I := I + 1;
-               exit when Bit_Index > 8;
-            end;
+            I := I + 1;
+            exit when Bit_Index > 8;
          end loop;
          Put_Line ("Secret message length:" & Length'Image);
          Read_Message;
@@ -291,47 +269,30 @@ procedure Unhide.Main is
          Bit_Index : Integer := 1;
       begin
          while I <= Bytes'Last - 1 loop
-            declare
-               Left_Byte  : Px.Byte := Bytes (I - 1);
-               Right_Byte : Px.Byte := Bytes (I + 1);
+            if U.Shall_Adjust_Byte (Bytes, I) then
+               declare
+                  Temp      : Px.Byte_Array (1..1) := Bytes (I..I);
+                  Temp_Bits : U.Bit_Array with
+                    Import  => True,
+                    Address => Temp (1)'Address;
 
-               Left_Bits : Bit_Array with
-                 Import  => True,
-                 Address => Left_Byte'Address;
+                  Current_Character_Bits : U.Bit_Array with
+                    Import  => True,
+                    Address => Secret (Current_Character_Index)'Address;
+               begin
+                  Current_Character_Bits (Bit_Index) := Temp_Bits (8);
 
-               Right_Bits : Bit_Array with
-                 Import  => True,
-                 Address => Right_Byte'Address;
-            begin
-               Left_Bits (8)  := False;
-               Right_Bits (8) := False;
+                  Bit_Index := Bit_Index + 1;
+                  if Bit_Index > 8 then
+                     Put (Secret (Current_Character_Index..Current_Character_Index));
+                     Bit_Index := 1;
+                     Current_Character_Index := Current_Character_Index + 1;
+                  end if;
+               end;
+            end if;
 
-               if Left_Byte /= Right_Byte then
---                    Put_line (Current_Character_Index'Image);
-                  declare
-                     Temp      : Px.Byte_Array (1..1) := Bytes (I..I);
-                     Temp_Bits : Bit_Array with
-                       Import  => True,
-                       Address => Temp (1)'Address;
-
-                     Current_Character_Bits : Bit_Array with
-                       Import  => True,
-                       Address => Secret (Current_Character_Index)'Address;
-                  begin
-                     Current_Character_Bits (Bit_Index) := Temp_Bits (8);
-
-                     Bit_Index := Bit_Index + 1;
-                     if Bit_Index > 8 then
-                        Put (Secret (Current_Character_Index..Current_Character_Index));
-                        Bit_Index := 1;
-                        Current_Character_Index := Current_Character_Index + 1;
-                     end if;
-                  end;
-               end if;
-
-               I := I + 1;
-               exit when Current_Character_Index > Length;
-            end;
+            I := I + 1;
+            exit when Current_Character_Index > Length;
          end loop;
          Put_Line ("");
       end Read_Message;

@@ -1,6 +1,9 @@
 with System.Storage_Elements;
+with Utilities;
 
 procedure Hide.Main is
+
+   package U renames Utilities;
 
    subtype Storage_Offset is System.Storage_Elements.Storage_Offset;
 
@@ -44,9 +47,6 @@ procedure Hide.Main is
         Pack => True;
 
    end BMP;
-
-   type Bit_Array is array (Integer range 1..8) of Boolean with
-     Pack => True;
 
    procedure Query_User_For_BMP_File_Name;
    procedure Open_File (File_Name : Px.C_String);
@@ -234,25 +234,9 @@ procedure Hide.Main is
 
    begin
       for I in Storage_Offset range 139..Bytes'Last - 1 loop
-         declare
-            Left_Byte  : Px.Byte := Bytes (I - 1);
-            Right_Byte : Px.Byte := Bytes (I + 1);
-
-            Left_Bits : Bit_Array with
-              Import  => True,
-              Address => Left_Byte'Address;
-
-            Right_Bits : Bit_Array with
-              Import  => True,
-              Address => Right_Byte'Address;
-         begin
-            Left_Bits (8)  := False;
-            Right_Bits (8) := False;
-
-            if Left_Byte /= Right_Byte then
-               Count := Count + 1;
-            end if;
-         end;
+         if U.Shall_Adjust_Byte (Bytes, I) then
+            Count := Count + 1;
+         end if;
       end loop;
 
       if Count >= 16 then
@@ -302,50 +286,34 @@ procedure Hide.Main is
       procedure Write_The_Rest_Of_The_Image;
 
       procedure Write_Length is
-         Length_Bits : constant Bit_Array with
+         Length_Bits : constant U.Bit_Array with
            Import  => True,
            Address => Length'Address;
 
          Bit_Index : Integer := 1;
       begin
          while I <= Bytes'Last - 1 loop
-            declare
-               Left_Byte  : Px.Byte := Bytes (I - 1);
-               Right_Byte : Px.Byte := Bytes (I + 1);
-
-               Left_Bits : Bit_Array with
-                 Import  => True,
-                 Address => Left_Byte'Address;
-
-               Right_Bits : Bit_Array with
-                 Import  => True,
-                 Address => Right_Byte'Address;
-            begin
-               Left_Bits (8)  := False;
-               Right_Bits (8) := False;
-
-               if Left_Byte /= Right_Byte then
-                  declare
-                     Temp      : Px.Byte := Bytes (I);
-                     Temp_Bits : Bit_Array with
-                       Import  => True,
-                       Address => Temp'Address;
-                  begin
-                     Temp_Bits (8) := Length_Bits (Bit_Index);
+            if U.Shall_Adjust_Byte (Bytes, I) then
+               declare
+                  Temp      : Px.Byte := Bytes (I);
+                  Temp_Bits : U.Bit_Array with
+                    Import  => True,
+                    Address => Temp'Address;
+               begin
+                  Temp_Bits (8) := Length_Bits (Bit_Index);
 
 --                     Put_Line ("Index" & I'Image & ", bit" & Temp_Bits (8)'Image);
 
-                     Write_Byte_To_Buffer (Temp);
+                  Write_Byte_To_Buffer (Temp);
 
-                     Bit_Index := Bit_Index + 1;
-                  end;
-               else
-                  Write_Byte_To_Buffer (Bytes (I));
-               end if;
+                  Bit_Index := Bit_Index + 1;
+               end;
+            else
+               Write_Byte_To_Buffer (Bytes (I));
+            end if;
 
-               I := I + 1;
-               exit when Bit_Index > 8;
-            end;
+            I := I + 1;
+            exit when Bit_Index > 8;
          end loop;
          Write_Message;
       end Write_Length;
@@ -355,49 +323,33 @@ procedure Hide.Main is
          Bit_Index : Integer := 1;
       begin
          while I <= Bytes'Last - 1 loop
-            declare
-               Left_Byte  : Px.Byte := Bytes (I - 1);
-               Right_Byte : Px.Byte := Bytes (I + 1);
+            if U.Shall_Adjust_Byte (Bytes, I) then
+               declare
+                  Temp      : Px.Byte := Bytes (I);
+                  Temp_Bits : U.Bit_Array with
+                    Import  => True,
+                    Address => Temp'Address;
 
-               Left_Bits : Bit_Array with
-                 Import  => True,
-                 Address => Left_Byte'Address;
+                  Current_Character_Bits : U.Bit_Array with
+                    Import  => True,
+                    Address => Secret (Current_Character_Index)'Address;
+               begin
+                  Temp_Bits (8) := Current_Character_Bits (Bit_Index);
 
-               Right_Bits : Bit_Array with
-                 Import  => True,
-                 Address => Right_Byte'Address;
-            begin
-               Left_Bits (8)  := False;
-               Right_Bits (8) := False;
+                  Write_Byte_To_Buffer (Temp);
 
-               if Left_Byte /= Right_Byte then
-                  declare
-                     Temp      : Px.Byte := Bytes (I);
-                     Temp_Bits : Bit_Array with
-                       Import  => True,
-                       Address => Temp'Address;
+                  Bit_Index := Bit_Index + 1;
+                  if Bit_Index > 8 then
+                     Bit_Index := 1;
+                     Current_Character_Index := Current_Character_Index + 1;
+                  end if;
+               end;
+            else
+               Write_Byte_To_Buffer (Bytes (I));
+            end if;
 
-                     Current_Character_Bits : Bit_Array with
-                       Import  => True,
-                       Address => Secret (Current_Character_Index)'Address;
-                  begin
-                     Temp_Bits (8) := Current_Character_Bits (Bit_Index);
-
-                     Write_Byte_To_Buffer (Temp);
-
-                     Bit_Index := Bit_Index + 1;
-                     if Bit_Index > 8 then
-                        Bit_Index := 1;
-                        Current_Character_Index := Current_Character_Index + 1;
-                     end if;
-                  end;
-               else
-                  Write_Byte_To_Buffer (Bytes (I));
-               end if;
-
-               I := I + 1;
-               exit when Current_Character_Index > Secret'Last;
-            end;
+            I := I + 1;
+            exit when Current_Character_Index > Secret'Last;
          end loop;
          Write_The_Rest_Of_The_Image;
       end Write_Message;
