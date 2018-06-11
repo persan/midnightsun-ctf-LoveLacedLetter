@@ -22,6 +22,8 @@ package body Hide.BMP is
    end NEXT;
 
 
+
+   -- Store a boolean value in a Pixel.
    function Encode (Src : Pixel_ARGB32; As : Boolean ) return Pixel_ARGB32 is
    begin
       return Ret : Pixel_ARGB32 := Src do
@@ -31,6 +33,8 @@ package body Hide.BMP is
       end return;
    end;
 
+   -- Store an ASCII string in the image and termiat the string
+   -- with the Terminator character
    procedure Encode
      (Image      : in out Image_ARGB32;
       Text       : in String)
@@ -57,6 +61,7 @@ package body Hide.BMP is
       end loop;
    end Encode;
 
+   -- Stores an integer as an ASCII string in the Image.
    procedure Encode
      (Image      : in out Image_ARGB32;
       Data       : in Integer)
@@ -76,8 +81,11 @@ package body Hide.BMP is
       pragma Unreferenced (Image_Info);
    begin
       pragma Debug (Posix.Put_Line ("Encode"));
+      -- Reset The chanel
       Chanel := Chanels'First;
+      -- Store the index to the string in the beginning of the image.
       Encode (Image, Offset);
+      -- Finally store the string at index.
       Encode (Image (Offset .. Image'Last), Text);
    end Encode;
 
@@ -85,6 +93,9 @@ package body Hide.BMP is
    -- Decode --
    ------------
 
+   --  =========================================================================
+   --  Read the boolean value stored in the pixel
+   --  And step to next channel.
    function Decode
      (Image      : in Pixel_ARGB32) return Boolean is
    begin
@@ -94,6 +105,9 @@ package body Hide.BMP is
       end return;
    end;
 
+   --  =========================================================================
+   --  Read the null terminated string stored in the begining of the pixel-vector
+   --
    function Decode
      (Image      : in Image_ARGB32)
       return String is
@@ -114,6 +128,8 @@ package body Hide.BMP is
    begin
       pragma Debug (Posix.Put_Line ("Decode"));
       loop
+         -- Read 8 consecutive bits to form one byte
+         -- and exit when the String termination charrater is found.
          for I in Input.As_Bit_Vector'Range loop
             Input.As_Bit_Vector (I) := Decode (Image (Input_Cursor));
             Input_Cursor := Input_Cursor + 1;
@@ -125,6 +141,7 @@ package body Hide.BMP is
          Output_Buffer (Output_Cursor) := Input.As_Character;
          Output_Cursor := Output_Cursor + 1;
       end loop;
+
       Output_Cursor := Output_Cursor - 1;
       pragma Debug (Posix.Put_Line(""));
       pragma Debug (Posix.Put_Line (Output_Buffer (Output_Buffer'First .. Output_Cursor)));
@@ -140,6 +157,10 @@ package body Hide.BMP is
    end;
 
 
+   --  ========================================================================
+   -- Read a string stored in the Pixel-array by first
+   -- reading a string contanit the offset to the real data
+   -- and then return the real data.
    function Decode
      (Image_Info : Info;
       Image      : in Image_ARGB32)
@@ -147,10 +168,15 @@ package body Hide.BMP is
    is
       pragma Unreferenced (Image_Info);
    begin
+      -- Reset the channel.
       Chanel := Chanels'First;
+      -- get the index to where the actual string is stored and then
+      -- Return the string.
       return Decode (Image (Decode (Image) .. Image'Last));
    end Decode;
 
+
+   -- Convinient image function.
    function Image ( Item : Info ) return String is
    begin
       return
